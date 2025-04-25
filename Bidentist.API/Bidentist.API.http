@@ -1,0 +1,6 @@
+@Bidentist.API_HostAddress = http://localhost:5036
+
+GET {{Bidentist.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
