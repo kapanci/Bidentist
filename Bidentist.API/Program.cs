@@ -8,7 +8,7 @@ builder.Services.AddControllers();
 
 // MongoDB Bağlantısı
 builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
-    new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection"))
+    new MongoClient(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 builder.Services.AddEndpointsApiExplorer();
