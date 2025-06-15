@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script>
+async function sendImageToAI() {
+    const input = document.getElementById('imageInput');
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log(result);
+
+        document.getElementById('result').innerText = "Yapay Zeka Tahmini: " + result.prediction;
+
+        document.getElementById('appointment-section').style.display = 'block';
+
+        const diseaseSelect = document.getElementById('disease-select');
+        diseaseSelect.innerHTML = '';
+        const option = document.createElement('option');
+        option.textContent = result.prediction;
+        diseaseSelect.appendChild(option);
+
+        updateDoctorList();
+    } catch (error) {
+        console.error("Hata oluştu:", error);
+        document.getElementById('result').innerText = "Hata oluştu: " + error;
+    }
+}
+
+function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.style.display = section.style.display === 'block' ? 'none' : 'block';
+}
+
+function updateDistricts() {
+    const citySelect = document.getElementById('city-select');
+    const districtSelect = document.getElementById('district-select');
+    districtSelect.innerHTML = '';
+
+    const istanbulDistricts = ['Kadıköy', 'Beşiktaş', 'Üsküdar', 'Bakırköy', 'Şişli', 'Fatih'];
+
+    if (citySelect.value === 'İstanbul') {
+        istanbulDistricts.forEach(district => {
+            const option = document.createElement('option');
+            option.textContent = district;
+            districtSelect.appendChild(option);
+        });
+    } else {
+        const option = document.createElement('option');
+        option.textContent = 'İlçe seçimi bulunmamaktadır';
+        districtSelect.appendChild(option);
+    }
+
+    updateDoctorList();
+}
+
+function updateDoctorList() {
+    const city = document.getElementById('city-select').value;
+    const district = document.getElementById('district-select').value;
+    const doctorSelect = document.getElementById('doctor-select');
+
+    doctorSelect.innerHTML = '';
+
+    const doctorMap = {
+        'İstanbul': {
+            'Kadıköy': ['Dr. Ali Osman  Özdemir - 9 puan', 'Dr. Murat Korkmaz - 8,5 puan','Dr. Emir Çetin - 7 puan ','Dr. Elif Kaya - 7 puan ','Dr. Burcu Eren - 6,5 puan', 'Dr. Onur Doğan - 6,5 puan'],
+            'Beşiktaş': ['Dr. Alper Çetin - 8 puan', 'Dr. Melih Altun - 8 puan'],
+            'Üsküdar': ['Dr. Hasan Yıldırım - 8 puan', 'Dr. Elif Kaya - 8 puan'],
+            'Bakırköy': ['Dr. Ceren Özkan - 8 puan', 'Dr. Gökhan Karaca - 8 puan'],
+            'Şişli': ['Dr. Onur Eren - 7,5 puan', 'Dr. Burcu Doğan - 7 puan'],
+            'Fatih': ['Dr. Mehmet Şahin - 9 puan', 'Dr. Bahar Avcı - 8 puan']
+        }
+    };
+
+    if (doctorMap[city] && doctorMap[city][district]) {
+        doctorMap[city][district].forEach(doc => {
+            const option = document.createElement('option');
+            option.textContent = doc;
+            doctorSelect.appendChild(option);
+        });
+    } else {
+        const option = document.createElement('option');
+        option.textContent = 'Uygun doktor bulunamadı';
+        doctorSelect.appendChild(option);
+    }
+}
+</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bidentist</title>
+  <style>
+    
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      min-height: 200vh;
+    }
+
+    body {
+      background: url('https://static.wixstatic.com/media/11062b_24fa7fc7316a4e9bbb770674700cb00f~mv2.jpeg/v1/fill/w_1901,h_1488,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/11062b_24fa7fc7316a4e9bbb770674700cb00f~mv2.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .header-logo {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      padding-top: 100px;
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .left-side {
+    width: 50%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    }
+
+    .right-side {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-width: 400px;
+    }
+
+    .left-side h1 {
+      font-size: 3em;
+      margin: 0;
+    }
+
+    .left-side button {
+      margin-top: 20px;
+      width: 380px;
+      height: 70px;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      background-color: #00aaff;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .slogan {
+      font-size: 2em;
+    }
+
+    .section {
+      display: none;
+      margin-top: 50px;
+      padding: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+    }
+
+    .dropzone {
+      margin-top: 10px;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 2px dashed white;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    select, input[type="date"], input[type="time"] {
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 100%;
+    }
+
+    .submit-btn {
+      margin-top: 15px;
+      background-color: #ffaa00;
+    }
+
+    .contact-map-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 40px;
+    }
+
+    #map {
+      width: 500px;
+      height: 300px;
+      border: none;
+    }
+
+    .contact-form {
+      width: 500px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .contact-form h2 {
+      margin-top: 0;
+      color: white;
+    }
+
+    .contact-form input, .contact-form textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Fonts (Poppins kullanıyoruz) -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- Üst Bar -->
+<div style="
+    width: 100%; 
+    background-color: #00aaff; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 15px 30px; 
+    font-size: 20px; 
+    color: #fff; 
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+">
+
+    <!-- Sol Taraf -->
+    <div style="font-weight: 600;">
+        Bidentist Yeni Nesil Randevu Sisteminiz...
+    </div>
+
+    <!-- Sağ Taraf (Butonlar) -->
+    <div>
+        <button style="
+            margin-right: 40px; 
+            padding: 8px 16px; 
+            background-color: transparent; 
+            border: 2px solid #fff; 
+            color: #fff; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+        ">Giriş Yap</button>
+
+        <button style="
+        margin-right: 50px;
+            padding: 8px 24px; 
+            background-color: #ffffff; 
+            color: #00aaff; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+        ">Üye Ol</button>
+    </div>
+
+</div>
+<!-- 
+<body> arka plan koyultma 
+  <div style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* %40 karartma */
+    z-index: 0;
+    pointer-events: none;
+  "></div>
+-->
+  <div class="main-content">
+    <div class="container">
+      
+      <div class="left-side">
+<div style="display: flex; align-items: center; gap: 15px;">
+    <img src="https://static.wixstatic.com/media/6e400c_1e6944326c2043f8acbd9fa79db2b89d~mv2.png/v1/fill/w_446,h_94,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20lacivert%20png%5B1%5D.png" alt="logo" style="height: 80px; width: auto;">
+</div>
+        <button onclick="toggleSection('ai-section')">AI Test</button>
+        <button onclick="toggleSection('appointment-section')">Randevu Oluştur</button>
+
+        <div class="section" id="ai-section">
+          <h2>Yapay Zeka Diş Taraması</h2>
+          <p>Fotoğrafınızı yükleyin, AI size bir ön değerlendirme ve uzman önerisi sunar.</p>
+          <div class="dropzone">Sürükleyip buraya bırakın ya da tıklayın</div>
+          <input type="file" id="imageInput">
+          <button onclick="sendImageToAI()">Test Et</button>
+          <p id="result"></p>
+        </div>
+
+        <div class="section" id="appointment-section">
+          <h2>Randevu Oluştur</h2>
+          <form onsubmit="handleAppointmentSubmit(event)">
+            <label>Hastalık Türü:</label>
+            <select id="disease-select"></select>
+
+            <label>Şehir Seçin:</label>
+            <select id="city-select" onchange="updateDistricts()">
+              <option>İstanbul</option>
+              <option>Ankara</option>
+              <option>İzmir</option>
+            </select>
+
+            <label>İlçe Seçin:</label>
+            <select id="district-select" onchange="updateDoctorList()">
+              <option>Kadıköy</option>
+              <option>Pendik</option>
+              <option>Sultanbeyli</option>
+              <option>Gaziosmanpaşa</option>
+            </select>
+
+            <label>Doktor Seçin:</label>
+            <select id="doctor-select">
+              <option>Dr. Ali</option>
+              <option>Dr. Emircan </option>
+              <option>Dr. Emre</option>
+              <option>DR. Osman</option>
+            </select>
+
+            <label>Tarih Seçin:</label>
+            <input type="date">
+
+            <label>Saat Seçin:</label>
+<select>
+<option>09:00</option>
+  <option>09:30</option>
+  <option>10:00</option>
+  <option disabled style="text-decoration: line-through;">10:30 (Dolu)</option>
+  <option>11:00</option>
+  <option>11:30</option>
+  <option disabled style="text-decoration: line-through;">12:00 (Dolu)</option>
+  <option>12:30</option>
+  <option>13:00</option>
+  <option>13:30</option>
+  <option>14:00</option>
+  <option>14:30</option>
+  <option>15:00</option>
+  <option disabled style="text-decoration: line-through;">15:30 (Dolu)</option>
+  <option>16:00</option>
+  <option>16:30</option>
+  <option>17:00</option>
+  <option>17:30</option>
+</select>
+
+
+            <button type="submit" class="submit-btn">Randevu Al</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="right-side">
+        <div class="slogan">
+          <div style="font-size: 2.5em; font-weight: bold; color: #0088cc;">Gülümseyin, iyileştiriyoruz</div>
+          <div style="margin-top: 10px; font-size: 1.2em; color: #0088cc;">Bidentist ile kolayca güvenilir klinik ve uzmanınızı seçin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alt kısım → Map + İletişim -->
+  <div class="contact-map-section">
+    <div id="map">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12042.588528920784!2d28.978359099999998!3d41.008237!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9a1b2d82c07%3A0x52c38bbfa7507c62!2sSultanahmet%2C%20Fatih%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1716475853092!5m2!1str!2str"
+        width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+    <div class="contact-form">
+      <h2>Bizimle İletişime Geçin</h2>
+      <input type="text" placeholder="İsminiz">
+      <input type="email" placeholder="Email adresiniz">
+      <textarea rows="5" placeholder="Mesajınız"></textarea>
+      <button class="submit-btn">Gönder</button>
+    </div>
+  </div>
+  <section id="comp-m2nu8q20" tabindex="-1" class="Oqnisf comp-m2nu8q20 wixui-section" data-block-level-container="ClassicSection" style="background-color: #00aaff;">
+  <div style="text-align:center; padding: 60px 20px;">
+    <h2 style="font-size: 40px; color: #FFFFFF; font-family: 'Poppins', sans-serif; letter-spacing: 0.01em;">
+      Güzel ve sağlıklı bir gülümseme için sadece 4 adım
+    </h2>
+  </div>
+  <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; padding: 20px 40px;">
+    <div style="flex: 1 1 200px; text-align: center;">
+      <img src="https://static.thenounproject.com/png/74436-200.png" width="105" alt="Adım 1">
+      <p style="margin-top: 30px; color: white;">Yapay zeka ile hastalığınızı tespit din</p>
+    </div>
+    <div style="flex: 1 1 200px; text-align: center;">
+      <img src="https://static.thenounproject.com/png/2701585-200.png" width="110" alt="Adım 2">
+      <p style="margin-top: 30px; color: white;">Ücretsiz randevu oluşturun</p>
+    </div>
+    <div style="flex: 1 1 200px; text-align: center;">
+      <img src="https://static.thenounproject.com/png/1351080-200.png" width="105" alt="Adım 3">
+      <p style="margin-top: 30px; color: white;">Tedavi planınızı alın</p>
+    </div>
+    <div style="flex: 1 1 200px; text-align: center;">
+      <img src="https://static.thenounproject.com/png/195678-200.png" width="105" alt="Adım 4">
+      <p style="margin-top: 30px; color: white;">Gülümsemenizin tadını çıkarın</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
